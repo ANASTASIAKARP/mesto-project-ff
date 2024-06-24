@@ -1,5 +1,5 @@
-const content = document.querySelector(".content");
-const cardContainer = content.querySelector(".places__list");
+export {createCard, deleteCard};
+
 const cardTemplate = document.querySelector("#card-template").content;
 
 function createCard(card, deleteCard) {
@@ -21,8 +21,3 @@ function createCard(card, deleteCard) {
 function deleteCard(evt) {
   evt.target.closest(".places__item").remove();
 }
-
-initialCards.forEach((card) => {
-  const newCard = createCard(card, deleteCard);
-  cardContainer.append(newCard);
-});
