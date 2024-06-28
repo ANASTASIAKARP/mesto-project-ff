@@ -42,5 +42,5 @@ function deleteCard(evt) {
 
 function likeCard(evt) {
   //функция лайка
-  evt.target.classList.add("card__like-button_is-active");
+  evt.target.classList.toggle("card__like-button_is-active");
 }
