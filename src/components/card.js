@@ -1,15 +1,14 @@
 export { createCard, deleteCard, likeCard };
-import {
-  openModalForImage,
-  closeModal,
-  closeForOverlayTypeEdit,
-} from "../components/modal.js";
 
 const cardTemplate = document.querySelector("#card-template").content;
-const popupTypeImage = document.querySelector(".popup_type_image");
-popupTypeImage.classList.add("popup_is-animated");
 
-function createCard(card, deleteCard, likeCard, openModalImage) {
+function createCard(
+  card,
+  deleteCard,
+  likeCard,
+  openModalImage,
+  popupTypeImage
+) {
   //ф-я создания карточки
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardElement.querySelector(".card__image");
@@ -20,13 +19,6 @@ function createCard(card, deleteCard, likeCard, openModalImage) {
   cardImage.addEventListener("click", function (evt) {
     openModalImage(popupTypeImage, evt);
   });
-
-  const buttonCloseImageModal = popupTypeImage.querySelector(".popup__close"); //переменная кнопка закрытия модального изображения
-  buttonCloseImageModal.addEventListener("click", () => {
-    closeModal(popupTypeImage);
-  });
-
-  popupTypeImage.addEventListener("click", closeForOverlayTypeEdit); //слушатель для оверлея
 
   cardElement
     .querySelector(".card__like-button") //слушатель для лайка

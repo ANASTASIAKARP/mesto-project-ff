@@ -3,8 +3,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin"); // подключит�
 const { CleanWebpackPlugin } = require("clean-webpack-plugin"); // подключили плагин
 const MiniCssExtractPlugin = require("mini-css-extract-plugin"); // подключите к проекту mini-css-extract-plugin
 
-module.exports = { 
-  devtool: 'source-map', //для улучшения отслеживания breakpoint
+module.exports = {
+  devtool: "source-map", //для улучшения отслеживания breakpoint
 
   entry: { main: "./src/scripts/index.js" },
   output: {
@@ -30,9 +30,18 @@ module.exports = {
       },
       //добавили правило для обработки файлов
       {
-        // регулярное выражение, которое ищет все файлы с такими расширениями
-        test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
+        test: /\.(png|svg|jpg|jpeg|gif)$/, //разделяем изображения и шрифты по разным папкам, чтобы они не лежали в одной директории
         type: "asset/resource",
+        generator: {
+          filename: "images/[name].[hash][ext]",
+        },
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: "asset/resource",
+        generator: {
+          filename: "fonts/[name].[hash][ext]",
+        },
       },
       {
         test: /\.css$/, // применять это правило только к CSS-файлам
@@ -42,12 +51,12 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           {
             loader: "css-loader",
-            options: { importLoaders: 1 }
+            options: { importLoaders: 1 },
           },
-          "postcss-loader"
-        ]
+          "postcss-loader",
+        ],
       },
-    ]
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
