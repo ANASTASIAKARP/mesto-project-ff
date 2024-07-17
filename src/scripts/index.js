@@ -1,13 +1,12 @@
 import "../pages/index.css"; //импорт стилей сss
-import { initialCards } from "../components/cards.js"; //импорт массива карточек
-import { createCard, deleteCard, likeCard } from "../components/card.js"; //импорт функций карточек
+import {createCard, deleteCard, likeCard} from "../components/card.js"; //импорт функций карточек
 import {
   openModal,
   closeModal,
   closeForOverlayTypeEdit,
 } from "../components/modal.js"; //импорт открытия и закрытия модалок
-
-import { enableValidation, clearValidation } from "../components/validation.js";
+import * as api from "../components/api.js";
+import {enableValidation, clearValidation} from "../components/validation.js";
 
 const validConfig = {
   formSelector: ".popup__form",
@@ -25,29 +24,57 @@ const cardContainer = content.querySelector(".places__list");
 const profileEditButton = content.querySelector(".profile__edit-button"); //переменные для редактирования профиля
 const popupProfileEdit = document.querySelector(".popup_type_edit");
 const closeButtonPopupProfileEdit =
-  popupProfileEdit.querySelector(".popup__close");
+    popupProfileEdit.querySelector(".popup__close");
 const profileEditForm = document.forms.edit_profile;
 
 const profileAddButton = content.querySelector(".profile__add-button"); //переменные для добавления новой карточки
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const closeButtonPopupTypeNewCard =
-  popupTypeNewCard.querySelector(".popup__close");
+    popupTypeNewCard.querySelector(".popup__close");
 const newPlaceForm = document.forms.new_place;
 
 const popupTypeImage = document.querySelector(".popup_type_image");
 const buttonCloseImageModal = popupTypeImage.querySelector(".popup__close"); //переменная кнопка закрытия модального изображения
 
+const popupDeleteCard = document.querySelector(".popup_type_delete_card");
+const buttonClosePopupDeleteCard = popupDeleteCard.querySelector(
+    ".popup__close");
+const buttonConfirmationDeleteCard = popupDeleteCard.querySelector(
+    ".popup__confirmation");
+
+let userId = '';
+
+//обновление профиля для формы редактировать
 function updateProfileFromFormEdit(evt) {
-  //обновление профиля для формы редактировать
   evt.preventDefault(); //отменяет стандартную отправку формы
   const formElement = document.forms.edit_profile;
   const nameInput = formElement.elements.name.value;
   const jobInput = formElement.elements.description.value;
-
-  document.querySelector(".profile__title").textContent = nameInput;
-  document.querySelector(".profile__description").textContent = jobInput;
-
+  api.updateUserInform({name: nameInput, about: jobInput})
+  .then((result) => {
+    fillingUserData(result);
+  })
   closeModal(popupProfileEdit);
+}
+
+const profile = document.querySelector(".profile");
+
+fillingData();
+
+function fillingData() {
+  Promise.all([api.getUserInfo(), api.getCards()])
+  .then(([userInfoResponse, cardsResponse]) => {
+    fillingUserData(userInfoResponse);
+    fillingCardsData(cardsResponse);
+  })
+}
+
+function fillingUserData(userInfoResponse) {
+  profile.querySelector(".profile__image").src = userInfoResponse.avatar;
+  profile.querySelector(".profile__title").textContent = userInfoResponse.name;
+  profile.querySelector(
+      ".profile__description").textContent = userInfoResponse.about;
+  userId = userInfoResponse._id;
 }
 
 function addNewCard(evt) {
@@ -57,18 +84,13 @@ function addNewCard(evt) {
   const nameInput = formElement.elements["place-name"].value;
   const linkInput = formElement.elements.link.value;
 
-  const newCard = createCard(
-    {
-      name: nameInput,
-      link: linkInput,
-    },
-    deleteCard,
-    likeCard,
-    openModalForImage,
-    popupTypeImage
-  );
-  cardContainer.insertBefore(newCard, cardContainer.children[0]); //ставим новую карточку на первое место в списке карточек
-
+  api.addNewCard({name: nameInput, link: linkInput})
+  .then((result) => {
+    const newCard = createCard(result, openModalForDeleteCard, likeCard,
+        openModalForImage,
+        popupTypeImage, userId);
+    cardContainer.insertBefore(newCard, cardContainer.children[0]); //ставим новую карточку на первое место в списке карточек
+  })
   closeModal(popupTypeNewCard);
   formElement.reset(); //убираем все данные с формы добавления новой карточки после
 }
@@ -78,11 +100,25 @@ function openModalEditProfile(element) {
   clearValidation(validConfig, profileEditForm);
   const name = document.querySelector(".profile__title").textContent;
   const description = document.querySelector(
-    ".profile__description"
+      ".profile__description"
   ).textContent;
   element.querySelector(".popup__input_type_name").value = name;
   element.querySelector(".popup__input_type_description").value = description;
   openModal(element);
+}
+
+function openModalForDeleteCard(card) {
+  openModal(popupDeleteCard);
+  buttonConfirmationDeleteCard.addEventListener('click',
+      () => confirmationDeleteCard(card, popupDeleteCard));
+}
+
+function confirmationDeleteCard(card, deleteModal) {
+  api.deleteCard(card.id)
+  .then(() => {
+    deleteCard(card);
+    closeModal(deleteModal);
+  })
 }
 
 function openModalForImage(element, evt) {
@@ -95,16 +131,19 @@ function openModalForImage(element, evt) {
   element.querySelector(".popup__caption").textContent = alt;
 }
 
-initialCards.forEach((card) => {
-  const newCard = createCard(
-    card,
-    deleteCard,
-    likeCard,
-    openModalForImage,
-    popupTypeImage
-  );
-  cardContainer.append(newCard); //перебор массива и создание новой карточки
-});
+function fillingCardsData(cardList) {
+  cardList.forEach((card) => {
+    const newCard = createCard(
+        card,
+        openModalForDeleteCard,
+        likeCard,
+        openModalForImage,
+        popupTypeImage,
+        userId
+    );
+    cardContainer.append(newCard); //перебор массива и создание новой карточки
+  });
+}
 
 profileEditButton.addEventListener("click", () => {
   //слушатель открытия эдит
@@ -144,4 +183,12 @@ buttonCloseImageModal.addEventListener("click", () => {
 
 popupTypeImage.addEventListener("click", closeForOverlayTypeEdit); //слушатель для оверлея
 
+buttonClosePopupDeleteCard.addEventListener("click", () => {
+  closeModal(popupDeleteCard);
+});
+
+popupDeleteCard.addEventListener("click", closeForOverlayTypeEdit);
+
 enableValidation(validConfig);
+
+

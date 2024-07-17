@@ -1,4 +1,4 @@
-export { openModal, closeModal, closeForOverlayTypeEdit };
+export {openModal, closeModal, closeForOverlayTypeEdit};
 
 function openModal(element) {
   //ф-я открытия модального окна
