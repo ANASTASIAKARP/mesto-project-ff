@@ -84,3 +84,35 @@ export const deleteCard = (cardId) => {
       }
   )
 }
+
+export const addLikeCard = (cardId) => {
+  return fetch('https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
+    method: 'PUT',
+    headers: {
+      authorization: token
+    }
+  })
+  .then((res) => {
+        if (res.ok) {
+          return res.json()
+        }
+        return Promise.reject(res.status);
+      }
+  )
+}
+
+export const deleteLikeCard = (cardId) => {
+  return fetch('https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
+    method: 'DELETE',
+    headers: {
+      authorization: token
+    }
+  })
+  .then((res) => {
+        if (res.ok) {
+          return res.json()
+        }
+        return Promise.reject(res.status);
+      }
+  )
+}

@@ -1,5 +1,5 @@
 import "../pages/index.css"; //импорт стилей сss
-import {createCard, deleteCard, likeCard} from "../components/card.js"; //импорт функций карточек
+import {createCard, deleteCard, checkLikeOwner} from "../components/card.js"; //импорт функций карточек
 import {
   openModal,
   closeModal,
@@ -7,6 +7,7 @@ import {
 } from "../components/modal.js"; //импорт открытия и закрытия модалок
 import * as api from "../components/api.js";
 import {enableValidation, clearValidation} from "../components/validation.js";
+import {addLikeCard, deleteLikeCard} from "../components/api.js";
 
 const validConfig = {
   formSelector: ".popup__form",
@@ -86,7 +87,7 @@ function addNewCard(evt) {
 
   api.addNewCard({name: nameInput, link: linkInput})
   .then((result) => {
-    const newCard = createCard(result, openModalForDeleteCard, likeCard,
+    const newCard = createCard(result, openModalForDeleteCard, likedCard,
         openModalForImage,
         popupTypeImage, userId);
     cardContainer.insertBefore(newCard, cardContainer.children[0]); //ставим новую карточку на первое место в списке карточек
@@ -136,7 +137,7 @@ function fillingCardsData(cardList) {
     const newCard = createCard(
         card,
         openModalForDeleteCard,
-        likeCard,
+        likedCard,
         openModalForImage,
         popupTypeImage,
         userId
@@ -190,5 +191,21 @@ buttonClosePopupDeleteCard.addEventListener("click", () => {
 popupDeleteCard.addEventListener("click", closeForOverlayTypeEdit);
 
 enableValidation(validConfig);
+
+function likedCard(card, cardLikeCount) {
+  debugger;
+  if (checkLikeOwner(card.likes, userId)) {
+    api.deleteLikeCard(card._id)
+    .then((res) => updateLikedCard(res, card, cardLikeCount));
+  } else {
+    api.addLikeCard(card._id)
+    .then((res) => updateLikedCard(res, card, cardLikeCount));
+  }
+}
+
+function updateLikedCard(data, card, count) {
+  card.likes = data.likes;
+  count.textContent = card.likes.length;
+}
 
 

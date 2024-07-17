@@ -1,4 +1,4 @@
-export {createCard, deleteCard, likeCard};
+export {createCard, deleteCard, toggleLikeCard, checkLikeOwner};
 
 const cardTemplate = document.querySelector("#card-template").content;
 
@@ -25,6 +25,8 @@ function createCard(
   const cardLikeCount = card.likes.length;
   const cardElementLikeCount = cardElement.querySelector(".card__like-count");
   const buttonDelete = cardElement.querySelector(".card__delete-button");
+  const cardLikeButton = cardElement.querySelector(".card__like-button");
+  const buttonLikeIcon = cardLikeButton.querySelector(".card__like-svg");
 
   cardElement.id = card._id;
   cardImage.src = card.link;
@@ -47,10 +49,14 @@ function createCard(
     });
   }
 
-  cardElement
-  .querySelector(".card__like-button") //слушатель для лайка
-  .addEventListener("click", function (evt) {
-    likeCard(evt);
+  if (checkLikeOwner(card.likes, userId)) {
+    toggleLikeCard(buttonLikeIcon);
+  }
+
+  cardLikeButton
+  .addEventListener("click", function () {
+    likeCard(card, cardElementLikeCount);
+    toggleLikeCard(buttonLikeIcon);
   });
 
   return cardElement;
@@ -68,7 +74,17 @@ function deleteCard(card) {
  * Поставка лайка (закрашивание)
  * @param evt Событие
  */
-function likeCard(evt) {
+function toggleLikeCard(buttonLike) {
   //функция лайка
-  evt.target.classList.toggle("card__like-button_is-active");
+  buttonLike.classList.toggle("card__like-button_is-active");
+}
+
+function checkLikeOwner(likes, userId) {
+  let res = false;
+  likes.forEach((like) => {
+    if (like._id === userId) {
+      res = true;
+    }
+  });
+  return res;
 }
