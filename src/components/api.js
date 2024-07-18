@@ -86,12 +86,13 @@ export const deleteCard = (cardId) => {
 }
 
 export const addLikeCard = (cardId) => {
-  return fetch('https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
-    method: 'PUT',
-    headers: {
-      authorization: token
-    }
-  })
+  return fetch(
+      'https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
+        method: 'PUT',
+        headers: {
+          authorization: token
+        }
+      })
   .then((res) => {
         if (res.ok) {
           return res.json()
@@ -102,12 +103,34 @@ export const addLikeCard = (cardId) => {
 }
 
 export const deleteLikeCard = (cardId) => {
-  return fetch('https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
-    method: 'DELETE',
-    headers: {
-      authorization: token
-    }
-  })
+  return fetch(
+      'https://mesto.nomoreparties.co/wff-cohort-18/cards/like/' + cardId, {
+        method: 'DELETE',
+        headers: {
+          authorization: token
+        }
+      })
+  .then((res) => {
+        if (res.ok) {
+          return res.json()
+        }
+        return Promise.reject(res.status);
+      }
+  )
+}
+
+export const updateAvatar = (avatar) => {
+  return fetch('https://mesto.nomoreparties.co/wff-cohort-18/users/me/avatar',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          avatar: avatar
+        }),
+        headers: {
+          authorization: token,
+          'Content-Type': 'application/json; charset=UTF-8'
+        }
+      })
   .then((res) => {
         if (res.ok) {
           return res.json()

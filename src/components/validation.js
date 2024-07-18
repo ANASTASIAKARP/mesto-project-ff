@@ -12,6 +12,7 @@ const showInputError = (validationConfig, formElement, formInput) => {
 //ф-я, которая удаляет класс с ошибкой
 const hideInputError = (formElement, formInput, validationConfig) => {
   // Находим элемент ошибки
+  debugger
   const errorElement = formElement.querySelector(`.${formInput.id}-error`);
   formInput.classList.remove(validationConfig.inputErrorClass); //удаляет инпуту класс с красной обводкой
   errorElement.classList.remove(validationConfig.inputErrorClass);
@@ -53,7 +54,9 @@ const enableValidation = (validationConfig) => {
   const formList = Array.from(
     document.querySelectorAll(validationConfig.formSelector)
   );
+  debugger
   formList.forEach((popupForm) => {
+    debugger
     popupForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
     });
