@@ -1,4 +1,4 @@
-export { enableValidation, clearValidation };
+export {enableValidation, clearValidation};
 
 //ф-я, которая добавляет класс с ошибкой
 const showInputError = (validationConfig, formElement, formInput) => {
@@ -6,13 +6,12 @@ const showInputError = (validationConfig, formElement, formInput) => {
   formInput.classList.add(validationConfig.inputErrorClass); //добавляет инпуту класс с красной обводкой
   errorElement.textContent = formInput.validationMessage;
   // Показываем сообщение об ошибке
-  errorElement.classList.add("popup__error_visible");
+  errorElement.classList.add(validationConfig.errorClass);
 };
 
 //ф-я, которая удаляет класс с ошибкой
 const hideInputError = (formElement, formInput, validationConfig) => {
   // Находим элемент ошибки
-  debugger
   const errorElement = formElement.querySelector(`.${formInput.id}-error`);
   formInput.classList.remove(validationConfig.inputErrorClass); //удаляет инпуту класс с красной обводкой
   errorElement.classList.remove(validationConfig.inputErrorClass);
@@ -21,26 +20,31 @@ const hideInputError = (formElement, formInput, validationConfig) => {
 
 //ф-я, которая проверяет валидность поля
 const checkInputValidity = (formElement, formInput, validationConfig) => {
-  if (formInput.validity.valueMissing)
-    formInput.setCustomValidity(formInput.dataset.errorEmpty); //если пустое
-  else if (formInput.validity.patternMismatch)
+  if (formInput.validity.valueMissing) {
+    formInput.setCustomValidity(formInput.dataset.errorEmpty);
+  }//если пустое
+  else if (formInput.validity.patternMismatch) {
     formInput.setCustomValidity(formInput.dataset.errorPattern);
-  //соответствует патерну
-  else if (formInput.validity.typeMismatch)
+  }//соответствует патерну
+  else if (formInput.validity.typeMismatch) {
     formInput.setCustomValidity(formInput.dataset.errorType);
-  //соответствует значению type
-  else formInput.setCustomValidity("");
-  if (!formInput.validity.valid)
+  }//соответствует значению type
+  else {
+    formInput.setCustomValidity("");
+  }
+  if (!formInput.validity.valid) {
     showInputError(validationConfig, formElement, formInput);
-  else hideInputError(formElement, formInput, validationConfig);
+  } else {
+    hideInputError(formElement, formInput, validationConfig);
+  }
 };
 
 const setEventListeners = (validationConfig, popupForm) => {
   const inputList = Array.from(
-    popupForm.querySelectorAll(validationConfig.inputSelector)
+      popupForm.querySelectorAll(validationConfig.inputSelector)
   );
   const buttonElement = popupForm.querySelector(
-    validationConfig.submitButtonSelector
+      validationConfig.submitButtonSelector
   );
   inputList.forEach((formInput) => {
     formInput.addEventListener("input", () => {
@@ -52,11 +56,9 @@ const setEventListeners = (validationConfig, popupForm) => {
 
 const enableValidation = (validationConfig) => {
   const formList = Array.from(
-    document.querySelectorAll(validationConfig.formSelector)
+      document.querySelectorAll(validationConfig.formSelector)
   );
-  debugger
   formList.forEach((popupForm) => {
-    debugger
     popupForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
     });
@@ -66,23 +68,21 @@ const enableValidation = (validationConfig) => {
 
 const clearValidation = (validationConfig, form) => {
   const errorlist = Array.from(
-    form.querySelectorAll(validationConfig.errorSelector)
+      form.querySelectorAll(validationConfig.errorSelector)
   );
-  const inputList = Array.from(
-    form.querySelectorAll(validationConfig.inputSelector)
-  );
+  Array.from(
+      form.querySelectorAll(validationConfig.inputSelector))
+  .forEach((input) => {
+    hideInputError(form, input, validationConfig);
+  });
   const buttonElement = form.querySelector(
-    validationConfig.submitButtonSelector
+      validationConfig.submitButtonSelector
   );
   form.reset();
   errorlist.forEach((error) => {
     error.classList.remove(validationConfig.errorClass);
     error.textContent = "";
   });
-  inputList.forEach((formInput) =>
-    formInput.classList.remove(validationConfig.inputErrorClass)
-  );
-  toggleButtonState(validationConfig, inputList, buttonElement);
 };
 
 //Ф-Я "блокировки" ищет невалидные поля

@@ -1,5 +1,10 @@
 import "../pages/index.css"; //импорт стилей сss
-import {checkLikeOwner, createCard, deleteCard} from "../components/card.js"; //импорт функций карточек
+import {
+  checkLikeOwner,
+  createCard,
+  deleteCard,
+  toggleLikeCard
+} from "../components/card.js"; //импорт функций карточек
 import {
   closeForOverlayTypeEdit,
   closeModal,
@@ -70,7 +75,7 @@ function updateProfileFromFormEdit(evt) {
   const jobInput = formElement.elements.description.value;
   api.updateUserInform({name: nameInput, about: jobInput})
   .then((result) => {
-    fillingUserData(result);
+    fillUserData(result);
   })
   .catch((err) => {
     console.log(err);
@@ -81,20 +86,20 @@ function updateProfileFromFormEdit(evt) {
   });
 }
 
-fillingData();
+fillData();
 
-function fillingData() {
+function fillData() {
   Promise.all([api.getUserInfo(), api.getCards()])
   .then(([userInfoResponse, cardsResponse]) => {
-    fillingUserData(userInfoResponse);
-    fillingCardsData(cardsResponse);
+    fillUserData(userInfoResponse);
+    fillCardsData(cardsResponse);
   })
   .catch((err) => {
     console.log(err);
   });
 }
 
-function fillingUserData(userInfoResponse) {
+function fillUserData(userInfoResponse) {
   userAvatar.src = userInfoResponse.avatar;
   profile.querySelector(".profile__title").textContent = userInfoResponse.name;
   profile.querySelector(
@@ -115,7 +120,7 @@ function addNewCard(evt) {
     const newCard = createCard(result, openModalForDeleteCard, likedCard,
         openModalForImage,
         popupTypeImage, userId);
-    cardContainer.insertBefore(newCard, cardContainer.children[0]); //ставим новую карточку на первое место в списке карточек
+    cardContainer.prepend(newCard); //ставим новую карточку на первое место в списке карточек
   })
   .catch((err) => {
     console.log(err);
@@ -139,11 +144,14 @@ function openModalEditProfile(element) {
   openModal(element);
 }
 
+let cardToDelete = null;
+
 function openModalForDeleteCard(card) {
   openModal(popupDeleteCard);
-  buttonConfirmationDeleteCard.addEventListener('click',
-      () => confirmationDeleteCard(card, popupDeleteCard));
+  cardToDelete = card;
 }
+buttonConfirmationDeleteCard.addEventListener('click',
+    () => confirmationDeleteCard(cardToDelete, popupDeleteCard));
 
 function confirmationDeleteCard(card, deleteModal) {
   api.deleteCard(card.id)
@@ -166,7 +174,7 @@ function openModalForImage(element, evt) {
   element.querySelector(".popup__caption").textContent = alt;
 }
 
-function fillingCardsData(cardList) {
+function fillCardsData(cardList) {
   cardList.forEach((card) => {
     const newCard = createCard(
         card,
@@ -186,7 +194,7 @@ function updateAvatar(evt) {
   const editAvatar = document.forms.edit_avatar;
   api.updateAvatar(editAvatar.link.value)
   .then((result) => {
-    fillingUserData(result);
+    fillUserData(result);
     closeModal(modalEditUserAvatar);
   })
   .catch((err) => {
@@ -198,22 +206,20 @@ function updateAvatar(evt) {
 
 enableValidation(validConfig);
 
-function likedCard(card, cardLikeCount) {
-  debugger;
-  if (checkLikeOwner(card.likes, userId)) {
-    api.deleteLikeCard(card._id)
-    .then((res) => updateLikedCard(res, card, cardLikeCount))
-    .catch((err) => {
-      console.log(err);
-    });
-  } else {
-    api.addLikeCard(card._id)
-    .then((res) => updateLikedCard(res, card, cardLikeCount))
-    .catch((err) => {
-      console.log(err);
-    });
-  }
+function likedCard(cardData, buttonLikeIcon, cardLikeCount) {
 
+  const likeMethod = checkLikeOwner(cardData.likes, userId) ? api.deleteLikeCard
+      :
+      api.addLikeCard;
+
+  likeMethod(cardData._id)
+  .then((res) => {
+    updateLikedCard(res, cardData, cardLikeCount);
+    toggleLikeCard(buttonLikeIcon);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 }
 
 function updateLikedCard(data, card, count) {

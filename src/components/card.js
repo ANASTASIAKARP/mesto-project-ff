@@ -55,8 +55,7 @@ function createCard(
 
   cardLikeButton
   .addEventListener("click", function () {
-    likeCard(card, cardElementLikeCount);
-    toggleLikeCard(buttonLikeIcon);
+    likeCard(card, buttonLikeIcon, cardElementLikeCount);
   });
 
   return cardElement;
